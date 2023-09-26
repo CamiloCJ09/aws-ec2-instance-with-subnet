@@ -110,17 +110,15 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
-resource "aws_instance" "my_ec2_instance" {
-  ami                         = data.aws_ami.ubuntu.id
-  instance_type               = "${var.itype}"
-  associate_public_ip_address = true
-  key_name                    = "my-ssh-key"
-  subnet_id                   = aws_subnet.my_subnet.id
-  vpc_security_group_ids      = [aws_security_group.my_security_group.id]
-  user_data                   = file("./launch-instance.sh")
-  tags = {
-    Name    = "${var.ec2_instance_name}"
-    project = "${var.ec2_project_name}"
-  }
+module "vm" {
+  source = "./modules/vm"
+  ami = data.aws_ami.ubuntu.id
+  itype = "t2.micro"
+  ec2_instance_name = "my-ec2-instance"
+  ec2_project_name = "my-project"
+  vpc_id = aws_vpc.my_vpc.id
+  subnet_id = aws_subnet.my_subnet.id
 }
+  
+
 
